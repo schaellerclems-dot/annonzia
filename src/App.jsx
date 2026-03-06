@@ -9,7 +9,7 @@ const PLANS = [
     price: "9",
     limit: "30 générations/mois",
     perks: ["30 générations par mois", "Toutes les plateformes", "Mots-clés SEO", "Prix suggéré IA"],
-    gumroadUrl: "https://votre-lien-gumroad-starter.com",
+    gumroadUrl: "https://schaeller.gumroad.com/l/rwwpd",
   },
   {
     id: "pro",
@@ -18,7 +18,7 @@ const PLANS = [
     limit: "Illimité",
     tag: "Populaire",
     perks: ["Générations illimitées", "Toutes les plateformes", "SEO avancé", "Prix suggéré IA", "Nouvelles plateformes en avant-première", "Support prioritaire"],
-    gumroadUrl: "https://votre-lien-gumroad-pro.com",
+    gumroadUrl: "https://schaeller.gumroad.com/l/dyrefy",
   },
 ];
 

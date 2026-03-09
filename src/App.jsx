@@ -12,7 +12,7 @@ const PLANS = [
   {
     id: "starter",
     name: "Starter",
-    price: "9",
+    price: "5",
     limit: "30 générations/mois",
     perks: ["30 générations par mois", "Toutes les plateformes", "Mots-clés SEO", "Prix suggéré IA"],
     gumroadUrl: "https://votre-lien-gumroad-starter.com",
@@ -20,7 +20,7 @@ const PLANS = [
   {
     id: "pro",
     name: "Pro",
-    price: "19",
+    price: "12",
     limit: "Illimité",
     tag: "Populaire",
     perks: ["Générations illimitées", "Toutes les plateformes", "SEO avancé", "Prix suggéré IA", "Nouvelles plateformes en avant-première", "Support prioritaire"],

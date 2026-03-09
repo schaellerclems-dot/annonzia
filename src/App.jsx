@@ -15,7 +15,7 @@ const PLANS = [
     price: "9",
     limit: "30 générations/mois",
     perks: ["30 générations par mois", "Toutes les plateformes", "Mots-clés SEO", "Prix suggéré IA"],
-    gumroadUrl: "https://schaeller.gumroad.com/l/rwwpd",
+    gumroadUrl: "https://votre-lien-gumroad-starter.com",
   },
   {
     id: "pro",
@@ -24,7 +24,7 @@ const PLANS = [
     limit: "Illimité",
     tag: "Populaire",
     perks: ["Générations illimitées", "Toutes les plateformes", "SEO avancé", "Prix suggéré IA", "Nouvelles plateformes en avant-première", "Support prioritaire"],
-    gumroadUrl: "https://schaeller.gumroad.com/l/dyrefy",
+    gumroadUrl: "https://votre-lien-gumroad-pro.com",
   },
 ];
 
@@ -42,6 +42,84 @@ const PLATFORM_TIPS = {
   amazon: "bullet points, caractéristiques techniques, bénéfices client",
 };
 
+// ─── BANDEAU COOKIES ───────────────────────────────────────────
+function CookieBanner({ onAccept }) {
+  return (
+    <div style={{ position:"fixed", bottom:0, left:0, right:0, zIndex:500, background:"#1a1008", color:"#fff", padding:"16px 24px", display:"flex", alignItems:"center", justifyContent:"space-between", gap:16, flexWrap:"wrap" }}>
+      <p style={{ fontSize:13, lineHeight:1.6, margin:0, flex:1 }}>
+        🍪 Annonzia utilise uniquement des cookies techniques nécessaires au bon fonctionnement du site. Aucun cookie publicitaire n'est utilisé.
+      </p>
+      <button onClick={onAccept} style={{ background:"#ff6b35", color:"#fff", border:"none", borderRadius:10, padding:"10px 20px", fontSize:13, fontWeight:700, cursor:"pointer", whiteSpace:"nowrap", fontFamily:"inherit" }}>
+        J'ai compris
+      </button>
+    </div>
+  );
+}
+
+// ─── PAGE MENTIONS LÉGALES ─────────────────────────────────────
+function LegalPage({ onClose }) {
+  return (
+    <div style={{ position:"fixed", inset:0, zIndex:400, background:"#fdf8f3", overflow:"auto" }}>
+      <div style={{ maxWidth:700, margin:"0 auto", padding:"40px 24px 80px" }}>
+        <button onClick={onClose} style={{ background:"#f5f0eb", border:"none", borderRadius:10, padding:"8px 16px", cursor:"pointer", fontSize:13, fontWeight:700, marginBottom:32, fontFamily:"inherit" }}>← Retour</button>
+
+        <h1 style={{ fontFamily:"Georgia,serif", fontSize:32, fontWeight:700, color:"#1a1008", marginBottom:8 }}>Mentions légales</h1>
+        <p style={{ color:"#8a7a6a", fontSize:13, marginBottom:40 }}>Dernière mise à jour : mars 2026</p>
+
+        {[
+          { title: "Éditeur du site", content: ["Clément Schaeller", "Saint-Pierre-des-Fleurs, France", "Email : contact@annonzia.fr", "Site web : https://annonzia.fr"] },
+          { title: "Hébergement", content: ["Vercel Inc.", "340 Pine Street, Suite 701", "San Francisco, CA 94104, États-Unis", "https://vercel.com"] },
+          { title: "Directeur de la publication", content: ["Clément Schaeller"] },
+          { title: "Propriété intellectuelle", content: ["L'ensemble du contenu de ce site (textes, images, logo, code) est la propriété exclusive de Clément Schaeller. Toute reproduction, même partielle, est interdite sans autorisation préalable."] },
+        ].map((s, i) => (
+          <div key={i} style={{ marginBottom:32 }}>
+            <h2 style={{ fontSize:18, fontWeight:700, color:"#1a1008", marginBottom:12, paddingBottom:8, borderBottom:"1px solid #f0e8e0" }}>{s.title}</h2>
+            {s.content.map((c, j) => <p key={j} style={{ fontSize:14, color:"#5a4a3a", lineHeight:1.8, margin:0 }}>{c}</p>)}
+          </div>
+        ))}
+
+        <h1 style={{ fontFamily:"Georgia,serif", fontSize:32, fontWeight:700, color:"#1a1008", marginBottom:8, marginTop:48 }}>Politique de confidentialité</h1>
+        <p style={{ color:"#8a7a6a", fontSize:13, marginBottom:40 }}>Dernière mise à jour : mars 2026</p>
+
+        {[
+          { title: "Responsable du traitement", content: ["Clément Schaeller — contact@annonzia.fr"] },
+          { title: "Données collectées", content: ["Dans le cadre de l'utilisation d'Annonzia, nous collectons les données suivantes :", "- Adresse email (lors de l'inscription)", "- Nombre de générations effectuées", "- Date de création du compte"] },
+          { title: "Finalité du traitement", content: ["Les données sont collectées pour :", "- Créer et gérer votre compte utilisateur", "- Comptabiliser vos générations gratuites", "- Vous envoyer les emails liés à votre compte (confirmation, mot de passe oublié)"] },
+          { title: "Base légale", content: ["Le traitement est basé sur l'exécution du contrat (article 6.1.b du RGPD)."] },
+          { title: "Conservation des données", content: ["Vos données sont conservées pendant toute la durée de votre compte, et supprimées dans les 30 jours suivant la suppression de votre compte."] },
+          { title: "Sous-traitants", content: ["- Supabase (base de données, authentification) — serveurs en Europe", "- Vercel (hébergement) — États-Unis, conformité RGPD assurée", "- Resend (envoi d'emails) — conforme RGPD", "- Gumroad (paiements) — gère ses propres données de paiement"] },
+          { title: "Vos droits", content: ["Conformément au RGPD, vous disposez des droits d'accès, de rectification, d'effacement et de portabilité de vos données. Pour exercer vos droits : contact@annonzia.fr"] },
+          { title: "Cookies", content: ["Annonzia utilise uniquement des cookies techniques nécessaires au fonctionnement du site (session utilisateur). Aucun cookie publicitaire ou de tracking n'est utilisé."] },
+        ].map((s, i) => (
+          <div key={i} style={{ marginBottom:32 }}>
+            <h2 style={{ fontSize:18, fontWeight:700, color:"#1a1008", marginBottom:12, paddingBottom:8, borderBottom:"1px solid #f0e8e0" }}>{s.title}</h2>
+            {s.content.map((c, j) => <p key={j} style={{ fontSize:14, color:"#5a4a3a", lineHeight:1.8, margin:0 }}>{c}</p>)}
+          </div>
+        ))}
+
+        <h1 style={{ fontFamily:"Georgia,serif", fontSize:32, fontWeight:700, color:"#1a1008", marginBottom:8, marginTop:48 }}>Conditions Générales d'Utilisation</h1>
+        <p style={{ color:"#8a7a6a", fontSize:13, marginBottom:40 }}>Dernière mise à jour : mars 2026</p>
+
+        {[
+          { title: "Article 1 — Objet", content: ["Les présentes CGU régissent l'utilisation du service Annonzia, accessible sur https://annonzia.fr, permettant la génération automatique d'annonces de vente en ligne grâce à l'intelligence artificielle."] },
+          { title: "Article 2 — Accès au service", content: ["L'accès au service nécessite la création d'un compte avec une adresse email valide. Trois générations gratuites sont offertes à l'inscription. Au-delà, un abonnement payant est requis."] },
+          { title: "Article 3 — Abonnements et tarifs", content: ["- Starter : 9€/mois — 30 générations par mois", "- Pro : 19€/mois — générations illimitées", "Les abonnements sont gérés via Gumroad et sont résiliables à tout moment."] },
+          { title: "Article 4 — Utilisation du service", content: ["L'utilisateur s'engage à utiliser le service de manière légale et éthique, à ne pas générer de contenu illégal ou frauduleux, et à ne pas tenter de contourner les limitations du service."] },
+          { title: "Article 5 — Responsabilité", content: ["Annonzia met à disposition un outil d'aide à la rédaction. L'utilisateur reste seul responsable du contenu des annonces publiées sur les plateformes tierces."] },
+          { title: "Article 6 — Droit applicable", content: ["Les présentes CGU sont soumises au droit français. En cas de litige, les tribunaux français seront compétents."] },
+          { title: "Article 7 — Contact", content: ["Pour toute question : contact@annonzia.fr"] },
+        ].map((s, i) => (
+          <div key={i} style={{ marginBottom:32 }}>
+            <h2 style={{ fontSize:18, fontWeight:700, color:"#1a1008", marginBottom:12, paddingBottom:8, borderBottom:"1px solid #f0e8e0" }}>{s.title}</h2>
+            {s.content.map((c, j) => <p key={j} style={{ fontSize:14, color:"#5a4a3a", lineHeight:1.8, margin:0 }}>{c}</p>)}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ─── PAGE RESET PASSWORD ───────────────────────────────────────
 function ResetPasswordPage() {
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
@@ -69,35 +147,16 @@ function ResetPasswordPage() {
           <p style={{ fontSize:22, fontWeight:700, color:"#1a1008" }}>Nouveau mot de passe</p>
           <p style={{ fontSize:13, color:"#8a7a6a", marginTop:6 }}>Choisissez un nouveau mot de passe sécurisé</p>
         </div>
-
         {success ? (
-          <div style={{ textAlign:"center", color:"#16a34a", fontWeight:600 }}>
-            ✓ Mot de passe modifié ! Redirection...
-          </div>
+          <div style={{ textAlign:"center", color:"#16a34a", fontWeight:600 }}>✓ Mot de passe modifié ! Redirection...</div>
         ) : (
           <>
             <div style={{ display:"flex", flexDirection:"column", gap:12 }}>
-              <input
-                type="password"
-                placeholder="Nouveau mot de passe"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                style={{ padding:"14px 16px", borderRadius:12, border:"1.5px solid #f0e8e0", fontSize:14, outline:"none", fontFamily:"inherit" }}
-              />
-              <input
-                type="password"
-                placeholder="Confirmer le mot de passe"
-                value={confirm}
-                onChange={(e) => setConfirm(e.target.value)}
-                style={{ padding:"14px 16px", borderRadius:12, border:"1.5px solid #f0e8e0", fontSize:14, outline:"none", fontFamily:"inherit" }}
-              />
+              <input type="password" placeholder="Nouveau mot de passe" value={password} onChange={(e) => setPassword(e.target.value)} style={{ padding:"14px 16px", borderRadius:12, border:"1.5px solid #f0e8e0", fontSize:14, outline:"none", fontFamily:"inherit" }} />
+              <input type="password" placeholder="Confirmer le mot de passe" value={confirm} onChange={(e) => setConfirm(e.target.value)} style={{ padding:"14px 16px", borderRadius:12, border:"1.5px solid #f0e8e0", fontSize:14, outline:"none", fontFamily:"inherit" }} />
             </div>
             {error && <p style={{ color:"#dc2626", fontSize:12, marginTop:8, textAlign:"center" }}>{error}</p>}
-            <button
-              onClick={handle}
-              disabled={loading}
-              style={{ width:"100%", padding:16, background:"linear-gradient(135deg,#ff6b35,#ff4500)", color:"#fff", border:"none", borderRadius:14, fontSize:15, fontWeight:700, cursor:"pointer", marginTop:16, fontFamily:"inherit", opacity: loading ? 0.7 : 1 }}
-            >
+            <button onClick={handle} disabled={loading} style={{ width:"100%", padding:16, background:"linear-gradient(135deg,#ff6b35,#ff4500)", color:"#fff", border:"none", borderRadius:14, fontSize:15, fontWeight:700, cursor:"pointer", marginTop:16, fontFamily:"inherit", opacity: loading ? 0.7 : 1 }}>
               {loading ? "Chargement..." : "Modifier le mot de passe"}
             </button>
           </>
@@ -107,6 +166,7 @@ function ResetPasswordPage() {
   );
 }
 
+// ─── MODALE AUTH ───────────────────────────────────────────────
 function AuthModal({ onClose, onAuth }) {
   const [mode, setMode] = useState("login");
   const [email, setEmail] = useState("");
@@ -116,29 +176,22 @@ function AuthModal({ onClose, onAuth }) {
   const [success, setSuccess] = useState(null);
 
   const handle = async () => {
-    setLoading(true);
-    setError(null);
-    setSuccess(null);
+    setLoading(true); setError(null); setSuccess(null);
     try {
       if (mode === "login") {
         const { data, error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
-        onAuth(data.user);
-        onClose();
+        onAuth(data.user); onClose();
       } else if (mode === "signup") {
         const { error } = await supabase.auth.signUp({ email, password });
         if (error) throw error;
         setSuccess("Compte créé ! Vérifiez votre email pour confirmer.");
       } else if (mode === "forgot") {
-        const { error } = await supabase.auth.resetPasswordForEmail(email, {
-          redirectTo: "https://annonzia.fr",
-        });
+        const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: "https://annonzia.fr" });
         if (error) throw error;
         setSuccess("Email envoyé ! Vérifiez votre boîte mail.");
       }
-    } catch (e) {
-      setError(e.message);
-    }
+    } catch (e) { setError(e.message); }
     setLoading(false);
   };
 
@@ -168,12 +221,10 @@ function AuthModal({ onClose, onAuth }) {
           {loading ? "Chargement..." : mode === "login" ? "Se connecter" : mode === "signup" ? "Créer mon compte" : "Envoyer le lien"}
         </button>
         <div style={{ textAlign:"center", marginTop:16, display:"flex", flexDirection:"column", gap:8 }}>
-          {mode === "login" && (
-            <>
-              <span style={{ fontSize:13, color:"#8a7a6a" }}>Pas encore de compte ? <span onClick={() => { setMode("signup"); setError(null); setSuccess(null); }} style={{ color:"#ff6b35", fontWeight:700, cursor:"pointer" }}>S'inscrire</span></span>
-              <span onClick={() => { setMode("forgot"); setError(null); setSuccess(null); }} style={{ fontSize:12, color:"#aaa", cursor:"pointer", textDecoration:"underline" }}>Mot de passe oublié ?</span>
-            </>
-          )}
+          {mode === "login" && (<>
+            <span style={{ fontSize:13, color:"#8a7a6a" }}>Pas encore de compte ? <span onClick={() => { setMode("signup"); setError(null); setSuccess(null); }} style={{ color:"#ff6b35", fontWeight:700, cursor:"pointer" }}>S'inscrire</span></span>
+            <span onClick={() => { setMode("forgot"); setError(null); setSuccess(null); }} style={{ fontSize:12, color:"#aaa", cursor:"pointer", textDecoration:"underline" }}>Mot de passe oublié ?</span>
+          </>)}
           {mode === "signup" && <span style={{ fontSize:13, color:"#8a7a6a" }}>Déjà un compte ? <span onClick={() => { setMode("login"); setError(null); setSuccess(null); }} style={{ color:"#ff6b35", fontWeight:700, cursor:"pointer" }}>Se connecter</span></span>}
           {mode === "forgot" && <span onClick={() => { setMode("login"); setError(null); setSuccess(null); }} style={{ fontSize:13, color:"#ff6b35", fontWeight:700, cursor:"pointer" }}>← Retour à la connexion</span>}
         </div>
@@ -182,6 +233,7 @@ function AuthModal({ onClose, onAuth }) {
   );
 }
 
+// ─── MODALE PAYWALL ────────────────────────────────────────────
 function PaywallModal({ onClose }) {
   const [selected, setSelected] = useState("pro");
   const plan = PLANS.find((p) => p.id === selected);
@@ -216,6 +268,7 @@ function PaywallModal({ onClose }) {
   );
 }
 
+// ─── APP PRINCIPALE ────────────────────────────────────────────
 export default function App() {
   const [user, setUser] = useState(null);
   const [usedCount, setUsedCount] = useState(0);
@@ -227,11 +280,12 @@ export default function App() {
   const [error, setError] = useState(null);
   const [showPaywall, setShowPaywall] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
+  const [showLegal, setShowLegal] = useState(false);
   const [loadingUser, setLoadingUser] = useState(true);
   const [isResetPage, setIsResetPage] = useState(false);
+  const [cookiesAccepted, setCookiesAccepted] = useState(() => localStorage.getItem("cookies_accepted") === "true");
 
   useEffect(() => {
-    // Détecter si c'est une redirection de reset password
     const hash = window.location.hash;
     if (hash.includes("type=recovery")) {
       setIsResetPage(true);
@@ -241,40 +295,30 @@ export default function App() {
       });
       return;
     }
-
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session?.user) {
-        setUser(session.user);
-        loadProfile(session.user.id);
-      }
+      if (session?.user) { setUser(session.user); loadProfile(session.user.id); }
       setLoadingUser(false);
     });
-
     supabase.auth.onAuthStateChange((_event, session) => {
-      if (session?.user) {
-        setUser(session.user);
-        loadProfile(session.user.id);
-      } else {
-        setUser(null);
-        setUsedCount(0);
-      }
+      if (session?.user) { setUser(session.user); loadProfile(session.user.id); }
+      else { setUser(null); setUsedCount(0); }
     });
   }, []);
 
   const loadProfile = async (userId) => {
     const { data } = await supabase.from("profiles").select("*").eq("id", userId).single();
-    if (data) {
-      setUsedCount(data.used_count || 0);
-    } else {
-      await supabase.from("profiles").insert({ id: userId, used_count: 0 });
-    }
+    if (data) { setUsedCount(data.used_count || 0); }
+    else { await supabase.from("profiles").insert({ id: userId, used_count: 0 }); }
   };
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
-    setUser(null);
-    setUsedCount(0);
-    setResult(null);
+    setUser(null); setUsedCount(0); setResult(null);
+  };
+
+  const acceptCookies = () => {
+    localStorage.setItem("cookies_accepted", "true");
+    setCookiesAccepted(true);
   };
 
   const remaining = FREE_LIMIT - usedCount;
@@ -284,9 +328,7 @@ export default function App() {
     if (!description.trim()) return;
     if (!user) { setShowAuth(true); return; }
     if (isLocked) { setShowPaywall(true); return; }
-    setLoading(true);
-    setResult(null);
-    setError(null);
+    setLoading(true); setResult(null); setError(null);
 
     const platformLabel = PLATFORMS.find((p) => p.id === platform)?.label;
     const tips = PLATFORM_TIPS[platform];
@@ -299,17 +341,8 @@ Réponds UNIQUEMENT en JSON valide, sans markdown, sans backticks :
     try {
       const res = await fetch("https://api.anthropic.com/v1/messages", {
         method: "POST",
-        headers: {
-          "content-type": "application/json",
-          "x-api-key": import.meta.env.VITE_ANTHROPIC_API_KEY,
-          "anthropic-version": "2023-06-01",
-          "anthropic-dangerous-direct-browser-access": "true",
-        },
-        body: JSON.stringify({
-          model: "claude-haiku-4-5-20251001",
-          max_tokens: 1000,
-          messages: [{ role: "user", content: prompt }],
-        }),
+        headers: { "content-type": "application/json", "x-api-key": import.meta.env.VITE_ANTHROPIC_API_KEY, "anthropic-version": "2023-06-01", "anthropic-dangerous-direct-browser-access": "true" },
+        body: JSON.stringify({ model: "claude-haiku-4-5-20251001", max_tokens: 1000, messages: [{ role: "user", content: prompt }] }),
       });
       const data = await res.json();
       if (data.error) { setError("Erreur API : " + data.error.message); setLoading(false); return; }
@@ -318,28 +351,21 @@ Réponds UNIQUEMENT en JSON valide, sans markdown, sans backticks :
       const newCount = usedCount + 1;
       setUsedCount(newCount);
       await supabase.from("profiles").update({ used_count: newCount }).eq("id", user.id);
-    } catch (e) {
-      setError("Une erreur est survenue : " + e.message);
-    }
+    } catch (e) { setError("Une erreur est survenue : " + e.message); }
     setLoading(false);
   };
 
   const copyAll = () => {
     if (!result) return;
     navigator.clipboard.writeText(`${result.titre}\n\n${result.description}\n\nMots-clés : ${result.mots_cles.join(", ")}\n\nPrix suggéré : ${result.prix_suggere}`);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    setCopied(true); setTimeout(() => setCopied(false), 2000);
   };
 
   const currentPlatform = PLATFORMS.find((p) => p.id === platform);
 
-  if (loadingUser) return (
-    <div style={{ minHeight:"100vh", background:"#fdf8f3", display:"flex", alignItems:"center", justifyContent:"center" }}>
-      <p style={{ color:"#8a7a6a", fontSize:14 }}>Chargement...</p>
-    </div>
-  );
-
+  if (loadingUser) return <div style={{ minHeight:"100vh", background:"#fdf8f3", display:"flex", alignItems:"center", justifyContent:"center" }}><p style={{ color:"#8a7a6a", fontSize:14 }}>Chargement...</p></div>;
   if (isResetPage) return <ResetPasswordPage />;
+  if (showLegal) return <LegalPage onClose={() => setShowLegal(false)} />;
 
   return (
     <div style={{ minHeight:"100vh", background:"#fdf8f3", fontFamily:"sans-serif", color:"#1a1008" }}>
@@ -353,9 +379,11 @@ Réponds UNIQUEMENT en JSON valide, sans markdown, sans backticks :
         textarea::placeholder { color:#d4c4b4; }
       `}</style>
 
+      {!cookiesAccepted && <CookieBanner onAccept={acceptCookies} />}
       {showPaywall && <PaywallModal onClose={() => setShowPaywall(false)} />}
       {showAuth && <AuthModal onClose={() => setShowAuth(false)} onAuth={(u) => { setUser(u); loadProfile(u.id); }} />}
 
+      {/* Navbar */}
       <div style={{ background:"#fff", borderBottom:"1px solid #f0e8e0", padding:"12px 24px", display:"flex", alignItems:"center", justifyContent:"space-between" }}>
         <div style={{ display:"flex", alignItems:"center", gap:8 }}>
           <div style={{ width:28, height:28, borderRadius:"50%", background:"linear-gradient(135deg,#ff6b35,#ff4500)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:14 }}>✦</div>
@@ -435,9 +463,13 @@ Réponds UNIQUEMENT en JSON valide, sans markdown, sans backticks :
           </div>
         )}
 
+        {/* Footer */}
         <div style={{ textAlign:"center", marginTop:56 }}>
           <p style={{ fontFamily:"'Fraunces',serif", fontSize:18, fontWeight:700, color:"#d4c4b4", marginBottom:6 }}>Annonzia</p>
-          <p style={{ fontSize:11, color:"#d4c4b4" }}>Propulsé par Claude · Fait en France 🇫🇷</p>
+          <p style={{ fontSize:11, color:"#d4c4b4", marginBottom:12 }}>Propulsé par Claude · Fait en France 🇫🇷</p>
+          <button onClick={() => setShowLegal(true)} style={{ fontSize:11, color:"#c4b4a4", background:"none", border:"none", cursor:"pointer", textDecoration:"underline", fontFamily:"inherit" }}>
+            Mentions légales · CGU · Politique de confidentialité
+          </button>
         </div>
       </div>
     </div>

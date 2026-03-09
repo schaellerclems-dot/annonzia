@@ -42,8 +42,73 @@ const PLATFORM_TIPS = {
   amazon: "bullet points, caractéristiques techniques, bénéfices client",
 };
 
+function ResetPasswordPage() {
+  const [password, setPassword] = useState("");
+  const [confirm, setConfirm] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(false);
+
+  const handle = async () => {
+    if (password !== confirm) { setError("Les mots de passe ne correspondent pas."); return; }
+    if (password.length < 6) { setError("Le mot de passe doit faire au moins 6 caractères."); return; }
+    setLoading(true);
+    setError(null);
+    const { error } = await supabase.auth.updateUser({ password });
+    if (error) { setError(error.message); setLoading(false); return; }
+    setSuccess(true);
+    setLoading(false);
+    setTimeout(() => window.location.href = "/", 2000);
+  };
+
+  return (
+    <div style={{ minHeight:"100vh", background:"#fdf8f3", display:"flex", alignItems:"center", justifyContent:"center", padding:24 }}>
+      <div style={{ background:"#fff", borderRadius:28, padding:"40px 36px", maxWidth:400, width:"100%" }}>
+        <div style={{ textAlign:"center", marginBottom:24 }}>
+          <div style={{ fontSize:36, marginBottom:12 }}>🔐</div>
+          <p style={{ fontSize:22, fontWeight:700, color:"#1a1008" }}>Nouveau mot de passe</p>
+          <p style={{ fontSize:13, color:"#8a7a6a", marginTop:6 }}>Choisissez un nouveau mot de passe sécurisé</p>
+        </div>
+
+        {success ? (
+          <div style={{ textAlign:"center", color:"#16a34a", fontWeight:600 }}>
+            ✓ Mot de passe modifié ! Redirection...
+          </div>
+        ) : (
+          <>
+            <div style={{ display:"flex", flexDirection:"column", gap:12 }}>
+              <input
+                type="password"
+                placeholder="Nouveau mot de passe"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                style={{ padding:"14px 16px", borderRadius:12, border:"1.5px solid #f0e8e0", fontSize:14, outline:"none", fontFamily:"inherit" }}
+              />
+              <input
+                type="password"
+                placeholder="Confirmer le mot de passe"
+                value={confirm}
+                onChange={(e) => setConfirm(e.target.value)}
+                style={{ padding:"14px 16px", borderRadius:12, border:"1.5px solid #f0e8e0", fontSize:14, outline:"none", fontFamily:"inherit" }}
+              />
+            </div>
+            {error && <p style={{ color:"#dc2626", fontSize:12, marginTop:8, textAlign:"center" }}>{error}</p>}
+            <button
+              onClick={handle}
+              disabled={loading}
+              style={{ width:"100%", padding:16, background:"linear-gradient(135deg,#ff6b35,#ff4500)", color:"#fff", border:"none", borderRadius:14, fontSize:15, fontWeight:700, cursor:"pointer", marginTop:16, fontFamily:"inherit", opacity: loading ? 0.7 : 1 }}
+            >
+              {loading ? "Chargement..." : "Modifier le mot de passe"}
+            </button>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function AuthModal({ onClose, onAuth }) {
-  const [mode, setMode] = useState("login"); // login | signup | forgot
+  const [mode, setMode] = useState("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -66,10 +131,10 @@ function AuthModal({ onClose, onAuth }) {
         setSuccess("Compte créé ! Vérifiez votre email pour confirmer.");
       } else if (mode === "forgot") {
         const { error } = await supabase.auth.resetPasswordForEmail(email, {
-          redirectTo: window.location.origin,
+          redirectTo: "https://annonzia.fr",
         });
         if (error) throw error;
-        setSuccess("Email envoyé ! Vérifiez votre boîte mail pour réinitialiser votre mot de passe.");
+        setSuccess("Email envoyé ! Vérifiez votre boîte mail.");
       }
     } catch (e) {
       setError(e.message);
@@ -82,73 +147,35 @@ function AuthModal({ onClose, onAuth }) {
     signup: { emoji: "✨", title: "Créer un compte", subtitle: "Gratuit — 3 générations offertes" },
     forgot: { emoji: "🔑", title: "Mot de passe oublié ?", subtitle: "Entrez votre email pour recevoir un lien" },
   };
-
   const t = titles[mode];
 
   return (
     <div style={{ position:"fixed", inset:0, zIndex:300, display:"flex", alignItems:"center", justifyContent:"center", padding:24, background:"rgba(15,10,5,0.7)" }}>
       <div style={{ background:"#fff", borderRadius:28, padding:"40px 36px", maxWidth:400, width:"100%", position:"relative" }}>
         <button onClick={onClose} style={{ position:"absolute", top:20, right:20, background:"#f5f0eb", border:"none", width:32, height:32, borderRadius:"50%", cursor:"pointer", fontSize:14 }}>✕</button>
-
         <div style={{ textAlign:"center", marginBottom:24 }}>
           <div style={{ fontSize:36, marginBottom:12 }}>{t.emoji}</div>
           <p style={{ fontSize:22, fontWeight:700, color:"#1a1008" }}>{t.title}</p>
           <p style={{ fontSize:13, color:"#8a7a6a", marginTop:6 }}>{t.subtitle}</p>
         </div>
-
         <div style={{ display:"flex", flexDirection:"column", gap:12 }}>
-          <input
-            type="email"
-            placeholder="Votre email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            style={{ padding:"14px 16px", borderRadius:12, border:"1.5px solid #f0e8e0", fontSize:14, outline:"none", fontFamily:"inherit" }}
-          />
-          {mode !== "forgot" && (
-            <input
-              type="password"
-              placeholder="Mot de passe"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              style={{ padding:"14px 16px", borderRadius:12, border:"1.5px solid #f0e8e0", fontSize:14, outline:"none", fontFamily:"inherit" }}
-            />
-          )}
+          <input type="email" placeholder="Votre email" value={email} onChange={(e) => setEmail(e.target.value)} style={{ padding:"14px 16px", borderRadius:12, border:"1.5px solid #f0e8e0", fontSize:14, outline:"none", fontFamily:"inherit" }} />
+          {mode !== "forgot" && <input type="password" placeholder="Mot de passe" value={password} onChange={(e) => setPassword(e.target.value)} style={{ padding:"14px 16px", borderRadius:12, border:"1.5px solid #f0e8e0", fontSize:14, outline:"none", fontFamily:"inherit" }} />}
         </div>
-
         {error && <p style={{ color:"#dc2626", fontSize:12, marginTop:8, textAlign:"center" }}>{error}</p>}
         {success && <p style={{ color:"#16a34a", fontSize:12, marginTop:8, textAlign:"center" }}>{success}</p>}
-
-        <button
-          onClick={handle}
-          disabled={loading}
-          style={{ width:"100%", padding:16, background:"linear-gradient(135deg,#ff6b35,#ff4500)", color:"#fff", border:"none", borderRadius:14, fontSize:15, fontWeight:700, cursor:"pointer", marginTop:16, fontFamily:"inherit", opacity: loading ? 0.7 : 1 }}
-        >
+        <button onClick={handle} disabled={loading} style={{ width:"100%", padding:16, background:"linear-gradient(135deg,#ff6b35,#ff4500)", color:"#fff", border:"none", borderRadius:14, fontSize:15, fontWeight:700, cursor:"pointer", marginTop:16, fontFamily:"inherit", opacity: loading ? 0.7 : 1 }}>
           {loading ? "Chargement..." : mode === "login" ? "Se connecter" : mode === "signup" ? "Créer mon compte" : "Envoyer le lien"}
         </button>
-
         <div style={{ textAlign:"center", marginTop:16, display:"flex", flexDirection:"column", gap:8 }}>
           {mode === "login" && (
             <>
-              <span style={{ fontSize:13, color:"#8a7a6a" }}>
-                Pas encore de compte ?{" "}
-                <span onClick={() => { setMode("signup"); setError(null); setSuccess(null); }} style={{ color:"#ff6b35", fontWeight:700, cursor:"pointer" }}>S'inscrire</span>
-              </span>
-              <span onClick={() => { setMode("forgot"); setError(null); setSuccess(null); }} style={{ fontSize:12, color:"#aaa", cursor:"pointer", textDecoration:"underline" }}>
-                Mot de passe oublié ?
-              </span>
+              <span style={{ fontSize:13, color:"#8a7a6a" }}>Pas encore de compte ? <span onClick={() => { setMode("signup"); setError(null); setSuccess(null); }} style={{ color:"#ff6b35", fontWeight:700, cursor:"pointer" }}>S'inscrire</span></span>
+              <span onClick={() => { setMode("forgot"); setError(null); setSuccess(null); }} style={{ fontSize:12, color:"#aaa", cursor:"pointer", textDecoration:"underline" }}>Mot de passe oublié ?</span>
             </>
           )}
-          {mode === "signup" && (
-            <span style={{ fontSize:13, color:"#8a7a6a" }}>
-              Déjà un compte ?{" "}
-              <span onClick={() => { setMode("login"); setError(null); setSuccess(null); }} style={{ color:"#ff6b35", fontWeight:700, cursor:"pointer" }}>Se connecter</span>
-            </span>
-          )}
-          {mode === "forgot" && (
-            <span onClick={() => { setMode("login"); setError(null); setSuccess(null); }} style={{ fontSize:13, color:"#ff6b35", fontWeight:700, cursor:"pointer" }}>
-              ← Retour à la connexion
-            </span>
-          )}
+          {mode === "signup" && <span style={{ fontSize:13, color:"#8a7a6a" }}>Déjà un compte ? <span onClick={() => { setMode("login"); setError(null); setSuccess(null); }} style={{ color:"#ff6b35", fontWeight:700, cursor:"pointer" }}>Se connecter</span></span>}
+          {mode === "forgot" && <span onClick={() => { setMode("login"); setError(null); setSuccess(null); }} style={{ fontSize:13, color:"#ff6b35", fontWeight:700, cursor:"pointer" }}>← Retour à la connexion</span>}
         </div>
       </div>
     </div>
@@ -178,11 +205,7 @@ function PaywallModal({ onClose }) {
           ))}
         </div>
         <ul style={{ listStyle:"none", margin:"16px 0 24px", display:"flex", flexDirection:"column", gap:9 }}>
-          {plan.perks.map((perk, i) => (
-            <li key={i} style={{ display:"flex", alignItems:"center", gap:10, fontSize:13, color:"#5a4a3a" }}>
-              <span style={{ color:"#ff6b35" }}>✓</span> {perk}
-            </li>
-          ))}
+          {plan.perks.map((perk, i) => <li key={i} style={{ display:"flex", alignItems:"center", gap:10, fontSize:13, color:"#5a4a3a" }}><span style={{ color:"#ff6b35" }}>✓</span> {perk}</li>)}
         </ul>
         <a href={plan.gumroadUrl} target="_blank" rel="noopener noreferrer" style={{ display:"block", width:"100%", padding:16, background:"linear-gradient(135deg,#ff6b35,#ff4500)", color:"#fff", border:"none", borderRadius:14, fontSize:15, fontWeight:700, cursor:"pointer", textDecoration:"none", textAlign:"center" }}>
           Commencer avec {plan.name} — {plan.price}€/mois
@@ -205,8 +228,20 @@ export default function App() {
   const [showPaywall, setShowPaywall] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
   const [loadingUser, setLoadingUser] = useState(true);
+  const [isResetPage, setIsResetPage] = useState(false);
 
   useEffect(() => {
+    // Détecter si c'est une redirection de reset password
+    const hash = window.location.hash;
+    if (hash.includes("type=recovery")) {
+      setIsResetPage(true);
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        if (session) setUser(session.user);
+        setLoadingUser(false);
+      });
+      return;
+    }
+
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
         setUser(session.user);
@@ -249,7 +284,6 @@ export default function App() {
     if (!description.trim()) return;
     if (!user) { setShowAuth(true); return; }
     if (isLocked) { setShowPaywall(true); return; }
-
     setLoading(true);
     setResult(null);
     setError(null);
@@ -281,7 +315,6 @@ Réponds UNIQUEMENT en JSON valide, sans markdown, sans backticks :
       if (data.error) { setError("Erreur API : " + data.error.message); setLoading(false); return; }
       const text = data.content?.map((b) => b.text || "").join("");
       setResult(JSON.parse(text.replace(/```json|```/g, "").trim()));
-
       const newCount = usedCount + 1;
       setUsedCount(newCount);
       await supabase.from("profiles").update({ used_count: newCount }).eq("id", user.id);
@@ -306,6 +339,8 @@ Réponds UNIQUEMENT en JSON valide, sans markdown, sans backticks :
     </div>
   );
 
+  if (isResetPage) return <ResetPasswordPage />;
+
   return (
     <div style={{ minHeight:"100vh", background:"#fdf8f3", fontFamily:"sans-serif", color:"#1a1008" }}>
       <style>{`
@@ -321,7 +356,6 @@ Réponds UNIQUEMENT en JSON valide, sans markdown, sans backticks :
       {showPaywall && <PaywallModal onClose={() => setShowPaywall(false)} />}
       {showAuth && <AuthModal onClose={() => setShowAuth(false)} onAuth={(u) => { setUser(u); loadProfile(u.id); }} />}
 
-      {/* Navbar */}
       <div style={{ background:"#fff", borderBottom:"1px solid #f0e8e0", padding:"12px 24px", display:"flex", alignItems:"center", justifyContent:"space-between" }}>
         <div style={{ display:"flex", alignItems:"center", gap:8 }}>
           <div style={{ width:28, height:28, borderRadius:"50%", background:"linear-gradient(135deg,#ff6b35,#ff4500)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:14 }}>✦</div>
@@ -334,9 +368,7 @@ Réponds UNIQUEMENT en JSON valide, sans markdown, sans backticks :
             <button onClick={handleLogout} style={{ fontSize:12, color:"#8a7a6a", background:"#f5f0eb", border:"none", padding:"6px 12px", borderRadius:8, cursor:"pointer", fontFamily:"inherit" }}>Déconnexion</button>
           </div>
         ) : (
-          <button onClick={() => setShowAuth(true)} style={{ fontSize:13, fontWeight:700, color:"#ff6b35", background:"#fff5f0", border:"none", padding:"8px 16px", borderRadius:10, cursor:"pointer", fontFamily:"inherit" }}>
-            Se connecter
-          </button>
+          <button onClick={() => setShowAuth(true)} style={{ fontSize:13, fontWeight:700, color:"#ff6b35", background:"#fff5f0", border:"none", padding:"8px 16px", borderRadius:10, cursor:"pointer", fontFamily:"inherit" }}>Se connecter</button>
         )}
       </div>
 
@@ -345,29 +377,21 @@ Réponds UNIQUEMENT en JSON valide, sans markdown, sans backticks :
           <h1 style={{ fontFamily:"'Fraunces',serif", fontSize:"clamp(40px,8vw,64px)", fontWeight:900, lineHeight:0.95, letterSpacing:"-0.03em" }}>
             Vos annonces,<br /><em style={{ fontStyle:"italic", color:"#ff6b35" }}>réinventées</em>
           </h1>
-          <p style={{ marginTop:18, fontSize:16, color:"#8a7a6a", lineHeight:1.6 }}>
-            Transformez une description brute en annonce vendeuse — en 10 secondes.
-          </p>
+          <p style={{ marginTop:18, fontSize:16, color:"#8a7a6a", lineHeight:1.6 }}>Transformez une description brute en annonce vendeuse — en 10 secondes.</p>
         </div>
 
         <p style={{ fontSize:11, fontWeight:700, letterSpacing:"0.12em", textTransform:"uppercase", color:"#c4b4a4", marginBottom:12 }}>01 — Plateforme cible</p>
         <div style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:8, marginBottom:24 }}>
           {PLATFORMS.map((p) => (
             <button key={p.id} className={`p-btn ${platform === p.id ? "active" : ""}`} onClick={() => setPlatform(p.id)}>
-              <span style={{ fontSize:22 }}>{p.icon}</span>
-              {p.label}
+              <span style={{ fontSize:22 }}>{p.icon}</span>{p.label}
             </button>
           ))}
         </div>
 
         <p style={{ fontSize:11, fontWeight:700, letterSpacing:"0.12em", textTransform:"uppercase", color:"#c4b4a4", marginBottom:12 }}>02 — Décrivez votre produit</p>
         <div style={{ background:"#fff", borderRadius:20, padding:20, border:"1.5px solid #f0e8e0", marginBottom:16 }}>
-          <textarea
-            rows={5}
-            placeholder={`Décrivez votre produit pour ${currentPlatform?.label}...\nEx : veste Levi's taille M, bleu, portée 5 fois...`}
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-          />
+          <textarea rows={5} placeholder={`Décrivez votre produit pour ${currentPlatform?.label}...\nEx : veste Levi's taille M, bleu, portée 5 fois...`} value={description} onChange={(e) => setDescription(e.target.value)} />
           <p style={{ fontSize:11, color:"#d4c4b4", marginTop:8, textAlign:"right" }}>{description.length} caractères</p>
         </div>
 
@@ -385,11 +409,7 @@ Réponds UNIQUEMENT en JSON valide, sans markdown, sans backticks :
           </div>
         )}
 
-        <button
-          onClick={generate}
-          disabled={loading || (user && !isLocked && !description.trim())}
-          style={{ width:"100%", padding:18, border:"none", borderRadius:16, fontSize:15, fontWeight:700, cursor:"pointer", background: isLocked && user ? "#f5f0eb" : "linear-gradient(135deg,#ff6b35,#ff4500)", color: isLocked && user ? "#c4b4a4" : "#fff", opacity: loading ? 0.7 : 1, fontFamily:"inherit" }}
-        >
+        <button onClick={generate} disabled={loading || (user && !isLocked && !description.trim())} style={{ width:"100%", padding:18, border:"none", borderRadius:16, fontSize:15, fontWeight:700, cursor:"pointer", background: isLocked && user ? "#f5f0eb" : "linear-gradient(135deg,#ff6b35,#ff4500)", color: isLocked && user ? "#c4b4a4" : "#fff", opacity: loading ? 0.7 : 1, fontFamily:"inherit" }}>
           {loading ? "Génération en cours..." : !user ? "✦ Générer mon annonce (inscription gratuite)" : isLocked ? "🔒 Débloquer l'accès illimité" : "✦ Générer mon annonce"}
         </button>
 
@@ -404,17 +424,12 @@ Réponds UNIQUEMENT en JSON valide, sans markdown, sans backticks :
             <hr style={{ border:"none", borderTop:"1px solid #f5f0eb", margin:"20px 0" }} />
             <p style={{ fontSize:10, fontWeight:700, letterSpacing:"0.14em", textTransform:"uppercase", color:"#d4c4b4", marginBottom:10 }}>Mots-clés SEO</p>
             <div style={{ display:"flex", flexWrap:"wrap", gap:6 }}>
-              {result.mots_cles?.map((k, i) => (
-                <span key={i} style={{ background:"#fff5f0", color:"#ff6b35", borderRadius:8, padding:"5px 12px", fontSize:12, fontWeight:600, border:"1px solid #ffe0d0" }}># {k}</span>
-              ))}
+              {result.mots_cles?.map((k, i) => <span key={i} style={{ background:"#fff5f0", color:"#ff6b35", borderRadius:8, padding:"5px 12px", fontSize:12, fontWeight:600, border:"1px solid #ffe0d0" }}># {k}</span>)}
             </div>
             <hr style={{ border:"none", borderTop:"1px solid #f5f0eb", margin:"20px 0" }} />
             <p style={{ fontSize:10, fontWeight:700, letterSpacing:"0.14em", textTransform:"uppercase", color:"#d4c4b4", marginBottom:10 }}>Prix suggéré</p>
             <span style={{ display:"inline-flex", background:"linear-gradient(135deg,#f0fdf4,#dcfce7)", color:"#16a34a", borderRadius:10, padding:"10px 16px", fontSize:15, fontWeight:700, border:"1px solid #bbf7d0" }}>💶 {result.prix_suggere}</span>
-            <button
-              onClick={copyAll}
-              style={{ width:"100%", padding:14, background: copied ? "#f0fdf4" : "#faf7f4", color: copied ? "#16a34a" : "#5a4a3a", border: copied ? "1.5px solid #bbf7d0" : "1.5px solid #f0e8e0", borderRadius:12, fontSize:13, fontWeight:700, cursor:"pointer", marginTop:16, fontFamily:"inherit" }}
-            >
+            <button onClick={copyAll} style={{ width:"100%", padding:14, background: copied ? "#f0fdf4" : "#faf7f4", color: copied ? "#16a34a" : "#5a4a3a", border: copied ? "1.5px solid #bbf7d0" : "1.5px solid #f0e8e0", borderRadius:12, fontSize:13, fontWeight:700, cursor:"pointer", marginTop:16, fontFamily:"inherit" }}>
               {copied ? "✓ Annonce copiée !" : "Copier l'annonce complète"}
             </button>
           </div>

@@ -1,4 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { createClient } from "@supabase/supabase-js";
+
+const supabase = createClient(
+  import.meta.env.VITE_SUPABASE_URL,
+  import.meta.env.VITE_SUPABASE_ANON_KEY
+);
 
 const FREE_LIMIT = 3;
 
@@ -35,6 +41,92 @@ const PLATFORM_TIPS = {
   etsy: "angle artisanal et unique, storytelling, mots-clés SEO anglais/français",
   amazon: "bullet points, caractéristiques techniques, bénéfices client",
 };
+
+function AuthModal({ onClose, onAuth }) {
+  const [mode, setMode] = useState("login");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(null);
+
+  const handle = async () => {
+    setLoading(true);
+    setError(null);
+    setSuccess(null);
+    try {
+      if (mode === "login") {
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) throw error;
+        onAuth(data.user);
+        onClose();
+      } else {
+        const { error } = await supabase.auth.signUp({ email, password });
+        if (error) throw error;
+        setSuccess("Compte créé ! Vérifiez votre email pour confirmer.");
+      }
+    } catch (e) {
+      setError(e.message);
+    }
+    setLoading(false);
+  };
+
+  return (
+    <div style={{ position:"fixed", inset:0, zIndex:300, display:"flex", alignItems:"center", justifyContent:"center", padding:24, background:"rgba(15,10,5,0.7)" }}>
+      <div style={{ background:"#fff", borderRadius:28, padding:"40px 36px", maxWidth:400, width:"100%", position:"relative" }}>
+        <button onClick={onClose} style={{ position:"absolute", top:20, right:20, background:"#f5f0eb", border:"none", width:32, height:32, borderRadius:"50%", cursor:"pointer", fontSize:14 }}>✕</button>
+        
+        <div style={{ textAlign:"center", marginBottom:24 }}>
+          <div style={{ fontSize:36, marginBottom:12 }}>{mode === "login" ? "👋" : "✨"}</div>
+          <p style={{ fontSize:22, fontWeight:700, color:"#1a1008" }}>
+            {mode === "login" ? "Bon retour !" : "Créer un compte"}
+          </p>
+          <p style={{ fontSize:13, color:"#8a7a6a", marginTop:6 }}>
+            {mode === "login" ? "Connectez-vous pour continuer" : "Gratuit — 3 générations offertes"}
+          </p>
+        </div>
+
+        <div style={{ display:"flex", flexDirection:"column", gap:12 }}>
+          <input
+            type="email"
+            placeholder="Votre email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            style={{ padding:"14px 16px", borderRadius:12, border:"1.5px solid #f0e8e0", fontSize:14, outline:"none", fontFamily:"inherit" }}
+          />
+          <input
+            type="password"
+            placeholder="Mot de passe"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            style={{ padding:"14px 16px", borderRadius:12, border:"1.5px solid #f0e8e0", fontSize:14, outline:"none", fontFamily:"inherit" }}
+          />
+        </div>
+
+        {error && <p style={{ color:"#dc2626", fontSize:12, marginTop:8, textAlign:"center" }}>{error}</p>}
+        {success && <p style={{ color:"#16a34a", fontSize:12, marginTop:8, textAlign:"center" }}>{success}</p>}
+
+        <button
+          onClick={handle}
+          disabled={loading}
+          style={{ width:"100%", padding:16, background:"linear-gradient(135deg,#ff6b35,#ff4500)", color:"#fff", border:"none", borderRadius:14, fontSize:15, fontWeight:700, cursor:"pointer", marginTop:16, fontFamily:"inherit" }}
+        >
+          {loading ? "Chargement..." : mode === "login" ? "Se connecter" : "Créer mon compte"}
+        </button>
+
+        <p style={{ textAlign:"center", marginTop:16, fontSize:13, color:"#8a7a6a" }}>
+          {mode === "login" ? "Pas encore de compte ? " : "Déjà un compte ? "}
+          <span
+            onClick={() => { setMode(mode === "login" ? "signup" : "login"); setError(null); setSuccess(null); }}
+            style={{ color:"#ff6b35", fontWeight:700, cursor:"pointer" }}
+          >
+            {mode === "login" ? "S'inscrire" : "Se connecter"}
+          </span>
+        </p>
+      </div>
+    </div>
+  );
+}
 
 function PaywallModal({ onClose }) {
   const [selected, setSelected] = useState("pro");
@@ -75,21 +167,62 @@ function PaywallModal({ onClose }) {
 }
 
 export default function App() {
+  const [user, setUser] = useState(null);
+  const [usedCount, setUsedCount] = useState(0);
   const [platform, setPlatform] = useState("leboncoin");
   const [description, setDescription] = useState("");
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState(null);
-  const [usedCount, setUsedCount] = useState(0);
   const [showPaywall, setShowPaywall] = useState(false);
+  const [showAuth, setShowAuth] = useState(false);
+  const [loadingUser, setLoadingUser] = useState(true);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        setUser(session.user);
+        loadProfile(session.user.id);
+      }
+      setLoadingUser(false);
+    });
+
+    supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) {
+        setUser(session.user);
+        loadProfile(session.user.id);
+      } else {
+        setUser(null);
+        setUsedCount(0);
+      }
+    });
+  }, []);
+
+  const loadProfile = async (userId) => {
+    const { data } = await supabase.from("profiles").select("*").eq("id", userId).single();
+    if (data) {
+      setUsedCount(data.used_count || 0);
+    } else {
+      await supabase.from("profiles").insert({ id: userId, email: user?.email, used_count: 0 });
+    }
+  };
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    setUser(null);
+    setUsedCount(0);
+    setResult(null);
+  };
 
   const remaining = FREE_LIMIT - usedCount;
   const isLocked = usedCount >= FREE_LIMIT;
 
   const generate = async () => {
     if (!description.trim()) return;
+    if (!user) { setShowAuth(true); return; }
     if (isLocked) { setShowPaywall(true); return; }
+
     setLoading(true);
     setResult(null);
     setError(null);
@@ -103,12 +236,11 @@ Réponds UNIQUEMENT en JSON valide, sans markdown, sans backticks :
 {"titre":"...","description":"...","mots_cles":["...","...","...","...","..."],"prix_suggere":"..."}`;
 
     try {
-      const apiKey = import.meta.env.VITE_ANTHROPIC_API_KEY;
       const res = await fetch("https://api.anthropic.com/v1/messages", {
         method: "POST",
         headers: {
           "content-type": "application/json",
-          "x-api-key": apiKey,
+          "x-api-key": import.meta.env.VITE_ANTHROPIC_API_KEY,
           "anthropic-version": "2023-06-01",
           "anthropic-dangerous-direct-browser-access": "true",
         },
@@ -119,14 +251,13 @@ Réponds UNIQUEMENT en JSON valide, sans markdown, sans backticks :
         }),
       });
       const data = await res.json();
-      if (data.error) {
-        setError("Erreur API : " + data.error.message);
-        setLoading(false);
-        return;
-      }
+      if (data.error) { setError("Erreur API : " + data.error.message); setLoading(false); return; }
       const text = data.content?.map((b) => b.text || "").join("");
       setResult(JSON.parse(text.replace(/```json|```/g, "").trim()));
-      setUsedCount((c) => c + 1);
+
+      const newCount = usedCount + 1;
+      setUsedCount(newCount);
+      await supabase.from("profiles").update({ used_count: newCount }).eq("id", user.id);
     } catch (e) {
       setError("Une erreur est survenue : " + e.message);
     }
@@ -142,6 +273,12 @@ Réponds UNIQUEMENT en JSON valide, sans markdown, sans backticks :
 
   const currentPlatform = PLATFORMS.find((p) => p.id === platform);
 
+  if (loadingUser) return (
+    <div style={{ minHeight:"100vh", background:"#fdf8f3", display:"flex", alignItems:"center", justifyContent:"center" }}>
+      <p style={{ color:"#8a7a6a", fontSize:14 }}>Chargement...</p>
+    </div>
+  );
+
   return (
     <div style={{ minHeight:"100vh", background:"#fdf8f3", fontFamily:"sans-serif", color:"#1a1008" }}>
       <style>{`
@@ -152,20 +289,36 @@ Réponds UNIQUEMENT en JSON valide, sans markdown, sans backticks :
         .p-btn:hover { border-color:#ffd4c2; }
         textarea { width:100%; background:transparent; border:none; outline:none; font-size:14px; color:#1a1008; line-height:1.75; resize:none; font-family:inherit; }
         textarea::placeholder { color:#d4c4b4; }
+        input:focus { border-color:#ffb894 !important; }
       `}</style>
 
       {showPaywall && <PaywallModal onClose={() => setShowPaywall(false)} />}
+      {showAuth && <AuthModal onClose={() => setShowAuth(false)} onAuth={(u) => { setUser(u); loadProfile(u.id); }} />}
 
-      <div style={{ maxWidth:680, margin:"0 auto", padding:"56px 24px 100px" }}>
-
-        {/* Header */}
-        <div style={{ marginBottom:52 }}>
-          <div style={{ display:"inline-flex", alignItems:"center", gap:8, background:"#fff", border:"1px solid #f0e8e0", borderRadius:100, padding:"7px 16px 7px 10px", marginBottom:28 }}>
-            <div style={{ width:28, height:28, borderRadius:"50%", background:"linear-gradient(135deg,#ff6b35,#ff4500)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:14 }}>✦</div>
-            <span style={{ fontSize:13, fontWeight:700 }}>Annonzia</span>
-            <span style={{ background:"#fff5f0", color:"#ff6b35", fontSize:10, fontWeight:700, padding:"2px 8px", borderRadius:20 }}>BETA</span>
+      {/* Header barre */}
+      <div style={{ background:"#fff", borderBottom:"1px solid #f0e8e0", padding:"12px 24px", display:"flex", alignItems:"center", justifyContent:"space-between" }}>
+        <div style={{ display:"flex", alignItems:"center", gap:8 }}>
+          <div style={{ width:28, height:28, borderRadius:"50%", background:"linear-gradient(135deg,#ff6b35,#ff4500)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:14 }}>✦</div>
+          <span style={{ fontSize:15, fontWeight:700 }}>Annonzia</span>
+          <span style={{ background:"#fff5f0", color:"#ff6b35", fontSize:10, fontWeight:700, padding:"2px 8px", borderRadius:20 }}>BETA</span>
+        </div>
+        {user ? (
+          <div style={{ display:"flex", alignItems:"center", gap:12 }}>
+            <span style={{ fontSize:12, color:"#8a7a6a" }}>{user.email}</span>
+            <button onClick={handleLogout} style={{ fontSize:12, color:"#8a7a6a", background:"#f5f0eb", border:"none", padding:"6px 12px", borderRadius:8, cursor:"pointer", fontFamily:"inherit" }}>Déconnexion</button>
           </div>
-          <h1 style={{ fontFamily:"'Fraunces',serif", fontSize:"clamp(40px,8vw,72px)", fontWeight:900, lineHeight:0.95, letterSpacing:"-0.03em" }}>
+        ) : (
+          <button onClick={() => setShowAuth(true)} style={{ fontSize:13, fontWeight:700, color:"#ff6b35", background:"#fff5f0", border:"none", padding:"8px 16px", borderRadius:10, cursor:"pointer", fontFamily:"inherit" }}>
+            Se connecter
+          </button>
+        )}
+      </div>
+
+      <div style={{ maxWidth:680, margin:"0 auto", padding:"48px 24px 100px" }}>
+
+        {/* Hero */}
+        <div style={{ marginBottom:48 }}>
+          <h1 style={{ fontFamily:"'Fraunces',serif", fontSize:"clamp(40px,8vw,64px)", fontWeight:900, lineHeight:0.95, letterSpacing:"-0.03em" }}>
             Vos annonces,<br /><em style={{ fontStyle:"italic", color:"#ff6b35" }}>réinventées</em>
           </h1>
           <p style={{ marginTop:18, fontSize:16, color:"#8a7a6a", lineHeight:1.6 }}>
@@ -196,26 +349,28 @@ Réponds UNIQUEMENT en JSON valide, sans markdown, sans backticks :
           <p style={{ fontSize:11, color:"#d4c4b4", marginTop:8, textAlign:"right" }}>{description.length} caractères</p>
         </div>
 
-        {/* Compteur */}
-        <div style={{ display:"flex", alignItems:"center", gap:12, marginBottom:14, background:"#fff", borderRadius:14, padding:"12px 18px", border:"1.5px solid #f0e8e0" }}>
-          <div style={{ display:"flex", gap:5 }}>
-            {Array.from({ length: FREE_LIMIT }).map((_, i) => (
-              <div key={i} style={{ width:9, height:9, borderRadius:"50%", background: i < usedCount ? "#ff6b35" : "#f0e8e0" }} />
-            ))}
+        {/* Compteur — seulement si connecté */}
+        {user && (
+          <div style={{ display:"flex", alignItems:"center", gap:12, marginBottom:14, background:"#fff", borderRadius:14, padding:"12px 18px", border:"1.5px solid #f0e8e0" }}>
+            <div style={{ display:"flex", gap:5 }}>
+              {Array.from({ length: FREE_LIMIT }).map((_, i) => (
+                <div key={i} style={{ width:9, height:9, borderRadius:"50%", background: i < usedCount ? "#ff6b35" : "#f0e8e0" }} />
+              ))}
+            </div>
+            <span style={{ flex:1, fontSize:12, fontWeight:600, color:"#8a7a6a" }}>
+              {remaining > 0 ? `${remaining} génération${remaining > 1 ? "s" : ""} gratuite${remaining > 1 ? "s" : ""} restante${remaining > 1 ? "s" : ""}` : "Limite atteinte"}
+            </span>
+            <button onClick={() => setShowPaywall(true)} style={{ fontSize:12, color:"#ff6b35", fontWeight:700, background:"#fff5f0", border:"none", cursor:"pointer", padding:"5px 10px", borderRadius:8, fontFamily:"inherit" }}>Passer Pro ↗</button>
           </div>
-          <span style={{ flex:1, fontSize:12, fontWeight:600, color:"#8a7a6a" }}>
-            {remaining > 0 ? `${remaining} génération${remaining > 1 ? "s" : ""} gratuite${remaining > 1 ? "s" : ""} restante${remaining > 1 ? "s" : ""}` : "Limite atteinte"}
-          </span>
-          <button onClick={() => setShowPaywall(true)} style={{ fontSize:12, color:"#ff6b35", fontWeight:700, background:"#fff5f0", border:"none", cursor:"pointer", padding:"5px 10px", borderRadius:8 }}>Passer Pro ↗</button>
-        </div>
+        )}
 
         {/* Bouton générer */}
         <button
           onClick={generate}
-          disabled={loading || (!isLocked && !description.trim())}
-          style={{ width:"100%", padding:18, border:"none", borderRadius:16, fontSize:15, fontWeight:700, cursor: loading ? "not-allowed" : "pointer", background: isLocked ? "#f5f0eb" : "linear-gradient(135deg,#ff6b35,#ff4500)", color: isLocked ? "#c4b4a4" : "#fff", opacity: loading ? 0.7 : 1, fontFamily:"inherit" }}
+          disabled={loading || (user && !isLocked && !description.trim())}
+          style={{ width:"100%", padding:18, border:"none", borderRadius:16, fontSize:15, fontWeight:700, cursor:"pointer", background: !user ? "linear-gradient(135deg,#ff6b35,#ff4500)" : isLocked ? "#f5f0eb" : "linear-gradient(135deg,#ff6b35,#ff4500)", color: isLocked && user ? "#c4b4a4" : "#fff", opacity: loading ? 0.7 : 1, fontFamily:"inherit" }}
         >
-          {loading ? "Génération en cours..." : isLocked ? "🔒 Débloquer l'accès illimité" : "✦ Générer mon annonce"}
+          {loading ? "Génération en cours..." : !user ? "✦ Générer mon annonce (inscription gratuite)" : isLocked ? "🔒 Débloquer l'accès illimité" : "✦ Générer mon annonce"}
         </button>
 
         {error && <div style={{ background:"#fff5f5", border:"1px solid #fecaca", color:"#dc2626", borderRadius:12, padding:"12px 16px", fontSize:13, marginTop:12, textAlign:"center" }}>{error}</div>}
@@ -225,24 +380,18 @@ Réponds UNIQUEMENT en JSON valide, sans markdown, sans backticks :
           <div style={{ marginTop:20, background:"#fff", borderRadius:20, padding:28, border:"1.5px solid #f0e8e0" }}>
             <p style={{ fontSize:10, fontWeight:700, letterSpacing:"0.14em", textTransform:"uppercase", color:"#d4c4b4", marginBottom:10 }}>Titre</p>
             <p style={{ fontFamily:"'Fraunces',serif", fontSize:22, fontWeight:700, color:"#1a1008", lineHeight:1.3, marginBottom:20 }}>{result.titre}</p>
-
             <p style={{ fontSize:10, fontWeight:700, letterSpacing:"0.14em", textTransform:"uppercase", color:"#d4c4b4", marginBottom:10 }}>Description</p>
             <p style={{ fontSize:14, color:"#5a4a3a", lineHeight:1.8 }}>{result.description}</p>
-
             <hr style={{ border:"none", borderTop:"1px solid #f5f0eb", margin:"20px 0" }} />
-
             <p style={{ fontSize:10, fontWeight:700, letterSpacing:"0.14em", textTransform:"uppercase", color:"#d4c4b4", marginBottom:10 }}>Mots-clés SEO</p>
             <div style={{ display:"flex", flexWrap:"wrap", gap:6 }}>
               {result.mots_cles?.map((k, i) => (
                 <span key={i} style={{ background:"#fff5f0", color:"#ff6b35", borderRadius:8, padding:"5px 12px", fontSize:12, fontWeight:600, border:"1px solid #ffe0d0" }}># {k}</span>
               ))}
             </div>
-
             <hr style={{ border:"none", borderTop:"1px solid #f5f0eb", margin:"20px 0" }} />
-
             <p style={{ fontSize:10, fontWeight:700, letterSpacing:"0.14em", textTransform:"uppercase", color:"#d4c4b4", marginBottom:10 }}>Prix suggéré</p>
             <span style={{ display:"inline-flex", background:"linear-gradient(135deg,#f0fdf4,#dcfce7)", color:"#16a34a", borderRadius:10, padding:"10px 16px", fontSize:15, fontWeight:700, border:"1px solid #bbf7d0" }}>💶 {result.prix_suggere}</span>
-
             <button
               onClick={copyAll}
               style={{ width:"100%", padding:14, background: copied ? "#f0fdf4" : "#faf7f4", color: copied ? "#16a34a" : "#5a4a3a", border: copied ? "1.5px solid #bbf7d0" : "1.5px solid #f0e8e0", borderRadius:12, fontSize:13, fontWeight:700, cursor:"pointer", marginTop:16, fontFamily:"inherit" }}

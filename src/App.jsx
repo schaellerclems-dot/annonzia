@@ -12,19 +12,19 @@ const PLANS = [
   {
     id: "starter",
     name: "Starter",
-    price: "5",
-    limit: "30 générations/mois",
-    perks: ["30 générations par mois", "Toutes les plateformes", "Mots-clés SEO", "Prix suggéré IA"],
-    gumroadUrl: "https://votre-lien-gumroad-starter.com",
+    price: "3.99",
+    limit: "50 générations/mois",
+    perks: ["50 générations par mois", "Toutes les plateformes", "Mots-clés SEO", "Prix suggéré IA"],
+    gumroadUrl: "https://schaeller.gumroad.com/l/rwwpd",
   },
   {
     id: "pro",
     name: "Pro",
-    price: "12",
+    price: "9.99",
     limit: "Illimité",
     tag: "Populaire",
     perks: ["Générations illimitées", "Toutes les plateformes", "SEO avancé", "Prix suggéré IA", "Nouvelles plateformes en avant-première", "Support prioritaire"],
-    gumroadUrl: "https://votre-lien-gumroad-pro.com",
+    gumroadUrl: "https://schaeller.gumroad.com/l/dyrefy",
   },
 ];
 
@@ -42,7 +42,6 @@ const PLATFORM_TIPS = {
   amazon: "bullet points, caractéristiques techniques, bénéfices client",
 };
 
-// ─── BANDEAU COOKIES ───────────────────────────────────────────
 function CookieBanner({ onAccept }) {
   return (
     <div style={{ position:"fixed", bottom:0, left:0, right:0, zIndex:500, background:"#1a1008", color:"#fff", padding:"16px 24px", display:"flex", alignItems:"center", justifyContent:"space-between", gap:16, flexWrap:"wrap" }}>
@@ -56,16 +55,13 @@ function CookieBanner({ onAccept }) {
   );
 }
 
-// ─── PAGE MENTIONS LÉGALES ─────────────────────────────────────
 function LegalPage({ onClose }) {
   return (
     <div style={{ position:"fixed", inset:0, zIndex:400, background:"#fdf8f3", overflow:"auto" }}>
       <div style={{ maxWidth:700, margin:"0 auto", padding:"40px 24px 80px" }}>
         <button onClick={onClose} style={{ background:"#f5f0eb", border:"none", borderRadius:10, padding:"8px 16px", cursor:"pointer", fontSize:13, fontWeight:700, marginBottom:32, fontFamily:"inherit" }}>← Retour</button>
-
         <h1 style={{ fontFamily:"Georgia,serif", fontSize:32, fontWeight:700, color:"#1a1008", marginBottom:8 }}>Mentions légales</h1>
         <p style={{ color:"#8a7a6a", fontSize:13, marginBottom:40 }}>Dernière mise à jour : mars 2026</p>
-
         {[
           { title: "Éditeur du site", content: ["Clément Schaeller", "Saint-Pierre-des-Fleurs, France", "Email : contact@annonzia.fr", "Site web : https://annonzia.fr"] },
           { title: "Hébergement", content: ["Vercel Inc.", "340 Pine Street, Suite 701", "San Francisco, CA 94104, États-Unis", "https://vercel.com"] },
@@ -77,10 +73,8 @@ function LegalPage({ onClose }) {
             {s.content.map((c, j) => <p key={j} style={{ fontSize:14, color:"#5a4a3a", lineHeight:1.8, margin:0 }}>{c}</p>)}
           </div>
         ))}
-
         <h1 style={{ fontFamily:"Georgia,serif", fontSize:32, fontWeight:700, color:"#1a1008", marginBottom:8, marginTop:48 }}>Politique de confidentialité</h1>
         <p style={{ color:"#8a7a6a", fontSize:13, marginBottom:40 }}>Dernière mise à jour : mars 2026</p>
-
         {[
           { title: "Responsable du traitement", content: ["Clément Schaeller — contact@annonzia.fr"] },
           { title: "Données collectées", content: ["Dans le cadre de l'utilisation d'Annonzia, nous collectons les données suivantes :", "- Adresse email (lors de l'inscription)", "- Nombre de générations effectuées", "- Date de création du compte"] },
@@ -96,14 +90,12 @@ function LegalPage({ onClose }) {
             {s.content.map((c, j) => <p key={j} style={{ fontSize:14, color:"#5a4a3a", lineHeight:1.8, margin:0 }}>{c}</p>)}
           </div>
         ))}
-
         <h1 style={{ fontFamily:"Georgia,serif", fontSize:32, fontWeight:700, color:"#1a1008", marginBottom:8, marginTop:48 }}>Conditions Générales d'Utilisation</h1>
         <p style={{ color:"#8a7a6a", fontSize:13, marginBottom:40 }}>Dernière mise à jour : mars 2026</p>
-
         {[
           { title: "Article 1 — Objet", content: ["Les présentes CGU régissent l'utilisation du service Annonzia, accessible sur https://annonzia.fr, permettant la génération automatique d'annonces de vente en ligne grâce à l'intelligence artificielle."] },
           { title: "Article 2 — Accès au service", content: ["L'accès au service nécessite la création d'un compte avec une adresse email valide. Trois générations gratuites sont offertes à l'inscription. Au-delà, un abonnement payant est requis."] },
-          { title: "Article 3 — Abonnements et tarifs", content: ["- Starter : 9€/mois — 30 générations par mois", "- Pro : 19€/mois — générations illimitées", "Les abonnements sont gérés via Gumroad et sont résiliables à tout moment."] },
+          { title: "Article 3 — Abonnements et tarifs", content: ["- Starter : 3,99€/mois — 50 générations par mois", "- Pro : 9,99€/mois — générations illimitées", "Les abonnements sont gérés via Gumroad et sont résiliables à tout moment."] },
           { title: "Article 4 — Utilisation du service", content: ["L'utilisateur s'engage à utiliser le service de manière légale et éthique, à ne pas générer de contenu illégal ou frauduleux, et à ne pas tenter de contourner les limitations du service."] },
           { title: "Article 5 — Responsabilité", content: ["Annonzia met à disposition un outil d'aide à la rédaction. L'utilisateur reste seul responsable du contenu des annonces publiées sur les plateformes tierces."] },
           { title: "Article 6 — Droit applicable", content: ["Les présentes CGU sont soumises au droit français. En cas de litige, les tribunaux français seront compétents."] },
@@ -119,7 +111,6 @@ function LegalPage({ onClose }) {
   );
 }
 
-// ─── PAGE RESET PASSWORD ───────────────────────────────────────
 function ResetPasswordPage() {
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
@@ -130,12 +121,10 @@ function ResetPasswordPage() {
   const handle = async () => {
     if (password !== confirm) { setError("Les mots de passe ne correspondent pas."); return; }
     if (password.length < 6) { setError("Le mot de passe doit faire au moins 6 caractères."); return; }
-    setLoading(true);
-    setError(null);
+    setLoading(true); setError(null);
     const { error } = await supabase.auth.updateUser({ password });
     if (error) { setError(error.message); setLoading(false); return; }
-    setSuccess(true);
-    setLoading(false);
+    setSuccess(true); setLoading(false);
     setTimeout(() => window.location.href = "/", 2000);
   };
 
@@ -166,7 +155,6 @@ function ResetPasswordPage() {
   );
 }
 
-// ─── MODALE AUTH ───────────────────────────────────────────────
 function AuthModal({ onClose, onAuth }) {
   const [mode, setMode] = useState("login");
   const [email, setEmail] = useState("");
@@ -233,7 +221,6 @@ function AuthModal({ onClose, onAuth }) {
   );
 }
 
-// ─── MODALE PAYWALL ────────────────────────────────────────────
 function PaywallModal({ onClose }) {
   const [selected, setSelected] = useState("pro");
   const plan = PLANS.find((p) => p.id === selected);
@@ -268,7 +255,6 @@ function PaywallModal({ onClose }) {
   );
 }
 
-// ─── APP PRINCIPALE ────────────────────────────────────────────
 export default function App() {
   const [user, setUser] = useState(null);
   const [usedCount, setUsedCount] = useState(0);
@@ -383,7 +369,6 @@ Réponds UNIQUEMENT en JSON valide, sans markdown, sans backticks :
       {showPaywall && <PaywallModal onClose={() => setShowPaywall(false)} />}
       {showAuth && <AuthModal onClose={() => setShowAuth(false)} onAuth={(u) => { setUser(u); loadProfile(u.id); }} />}
 
-      {/* Navbar */}
       <div style={{ background:"#fff", borderBottom:"1px solid #f0e8e0", padding:"12px 24px", display:"flex", alignItems:"center", justifyContent:"space-between" }}>
         <div style={{ display:"flex", alignItems:"center", gap:8 }}>
           <div style={{ width:28, height:28, borderRadius:"50%", background:"linear-gradient(135deg,#ff6b35,#ff4500)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:14 }}>✦</div>
@@ -463,7 +448,6 @@ Réponds UNIQUEMENT en JSON valide, sans markdown, sans backticks :
           </div>
         )}
 
-        {/* Footer */}
         <div style={{ textAlign:"center", marginTop:56 }}>
           <p style={{ fontFamily:"'Fraunces',serif", fontSize:18, fontWeight:700, color:"#d4c4b4", marginBottom:6 }}>Annonzia</p>
           <p style={{ fontSize:11, color:"#d4c4b4", marginBottom:12 }}>Propulsé par Claude · Fait en France 🇫🇷</p>
